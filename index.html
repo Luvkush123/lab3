@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Information System — Lab 3</title>
+  <style>
+    /* Global Reset & Styling */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: #f4f6f9;
+      color: #333;
+    }
+
+    /* Header */
+    header {
+      background-color: #2c3e50;
+      color: #ffffff;
+      padding: 15px 25px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      margin-bottom: 4px;
+    }
+
+    header p {
+      font-size: 0.9rem;
+      color: #bdc3c7;
+    }
+
+    /* Main Container (Two-Part Split Frame Layout) */
+    .container {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 80px);
+      overflow: hidden;
+    }
+
+    /* Left Part: Books List */
+    .left-panel {
+      width: 30%;
+      min-width: 260px;
+      max-width: 350px;
+      background-color: #ffffff;
+      border-right: 2px solid #e2e8f0;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .left-panel h2 {
+      font-size: 1.2rem;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #3498db;
+    }
+
+    .book-list {
+      list-style-type: none;
+    }
+
+    .book-list li {
+      margin-bottom: 10px;
+    }
+
+    .book-list a {
+      display: block;
+      padding: 12px 15px;
+      background-color: #f8fafc;
+      color: #334155;
+      text-decoration: none;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .book-list a:hover {
+      background-color: #e2e8f0;
+      color: #1e293b;
+      transform: translateX(4px);
+    }
+
+    .book-list a.active {
+      background-color: #3498db;
+      color: #ffffff;
+      border-color: #2980b9;
+      box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+    }
+
+    /* Right Part: Book Information Frame */
+    .right-panel {
+      flex: 1;
+      height: 100%;
+      background-color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .frame-toolbar {
+      background-color: #edf2f7;
+      padding: 8px 15px;
+      font-size: 0.85rem;
+      color: #4a5568;
+      border-bottom: 1px solid #cbd5e1;
+      font-family: monospace;
+    }
+
+    .book-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background-color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <h1>Online Book Information Portal</h1>
+    <p>Web Programming Lab 3 — Two-Part Frame Architecture</p>
+  </header>
+
+  <!-- Two-Part Workspace -->
+  <div class="container">
+    
+    <!-- Left Part: Books List -->
+    <aside class="left-panel">
+      <h2>Select a Book</h2>
+      <ul class="book-list" id="bookList">
+        <li><a href="#" class="active" onclick="displayBook(0); return false;">1. Clean Code</a></li>
+        <li><a href="#" onclick="displayBook(1); return false;">2. Java: The Complete Reference</a></li>
+        <li><a href="#" onclick="displayBook(2); return false;">3. Operating System Concepts</a></li>
+        <li><a href="#" onclick="displayBook(3); return false;">4. Database System Concepts</a></li>
+        <li><a href="#" onclick="displayBook(4); return false;">5. Computer Networks</a></li>
+        <li><a href="#" onclick="displayBook(5); return false;">6. Web Technologies</a></li>
+      </ul>
+    </aside>
+
+    <!-- Right Part: Book Information Frame -->
+    <section class="right-panel">
+      <div class="frame-toolbar">
+        &lt;iframe name="bookInfoFrame"&gt; — Displaying Book Details
+      </div>
+      <iframe name="bookInfoFrame" id="bookInfoFrame" class="book-frame" title="Book Details Frame"></iframe>
+    </section>
+
+  </div>
+
+  <!-- JavaScript Data & Logic -->
+  <script>
+    // Simple Array of Book Objects
+    const books = [
+      {
+        title: "Clean Code: A Handbook of Agile Software Craftsmanship",
+        author: "Robert C. Martin",
+        publisher: "Prentice Hall",
+        edition: "1st Edition",
+        year: 2008,
+        isbn: "978-0132350884",
+        price: "$37.99",
+        category: "Software Engineering",
+        description: "Even bad code can function. But if code isn't clean, it can bring a development organization to its knees. This book teaches the principles, patterns, and practices of writing clean code with case studies and hands-on exercises.",
+        topics: ["Meaningful Names", "Functions & Single Responsibility", "Formatting & Comments", "Error Handling & Unit Testing", "Refactoring Smells"]
+      },
+      {
+        title: "Java: The Complete Reference",
+        author: "Herbert Schildt",
+        publisher: "McGraw-Hill Education",
+        edition: "12th Edition",
+        year: 2021,
+        isbn: "978-1260440232",
+        price: "$45.00",
+        category: "Programming Languages",
+        description: "Fully updated for Java SE 17, this definitive guide explains how to develop, compile, debug, and run Java programs. Covers the entire Java language including syntax, keywords, object-oriented concepts, and the standard API library.",
+        topics: ["OOP Concepts & Inheritance", "Exception Handling", "Multithreading & Concurrency", "Generics & Lambda Expressions", "Java Collections Framework"]
+      },
+      {
+        title: "Operating System Concepts",
+        author: "Abraham Silberschatz, Peter B. Galvin, Greg Gagne",
+        publisher: "Wiley",
+        edition: "10th Edition",
+        year: 2018,
+        isbn: "978-1118063330",
+        price: "$65.50",
+        category: "Systems & Architecture",
+        description: "The tenth edition of Operating System Concepts provides a clear description of the concepts that underlie operating systems. Includes fundamental topics like processes, threads, memory management, and file systems.",
+        topics: ["Process Management & Scheduling", "Inter-Process Communication (IPC)", "Deadlocks & Synchronization", "Virtual Memory & Paging", "File-System Implementation"]
+      },
+      {
+        title: "Database System Concepts",
+        author: "Abraham Silberschatz, Henry F. Korth, S. Sudarshan",
+        publisher: "McGraw-Hill",
+        edition: "7th Edition",
+        year: 2019,
+        isbn: "978-0078022159",
+        price: "$58.00",
+        category: "Database Systems",
+        description: "Presents the fundamental concepts of database management in an intuitive manner. Covers relational databases, SQL queries, schema design, normalization, transaction processing, and big data architectures.",
+        topics: ["Relational Model & Algebra", "SQL Queries & Triggers", "Normalization (1NF to BCNF)", "Transactions & ACID Properties", "Indexing and Hashing"]
+      },
+      {
+        title: "Computer Networks",
+        author: "Andrew S. Tanenbaum, David J. Wetherall",
+        publisher: "Pearson",
+        edition: "5th Edition",
+        year: 2011,
+        isbn: "978-0132126953",
+        price: "$52.00",
+        category: "Networking",
+        description: "Describes the principles of computer networking from the hardware physical layer up through the application layer. Explains internet protocols, wireless networking, routing algorithms, and network security.",
+        topics: ["OSI & TCP/IP Layer Models", "Data Link Layer & Framing", "Network Layer & Routing (Dijkstra, Distance Vector)", "Transport Layer (TCP vs UDP)", "Application Layer (HTTP, DNS, SMTP)"]
+      },
+      {
+        title: "Web Technologies: HTML, JavaScript, PHP & Java",
+        author: "Achyut S. Godbole, Atul Kahate",
+        publisher: "McGraw-Hill Education",
+        edition: "3rd Edition",
+        year: 2013,
+        isbn: "978-1259062971",
+        price: "$34.00",
+        category: "Web Programming",
+        description: "A comprehensive textbook designed for undergraduate students of computer science covering the complete spectrum of web technologies, internet architecture, clientside and serverside programming.",
+        topics: ["HTML5 & CSS3 Styling", "Frames, Tables & Forms", "Clientside JavaScript", "DOM Manipulation & Events", "Serverside Scripting & Databases"]
+      }
+    ];
+
+    // Function to load selected book into the right iframe
+    function displayBook(index) {
+      const book = books[index];
+      const iframe = document.getElementById("bookInfoFrame");
+
+      // Update active styling on left links
+      const links = document.querySelectorAll("#bookList a");
+      links.forEach((link, idx) => {
+        if (idx === index) {
+          link.classList.add("active");
+        } else {
+          link.classList.remove("active");
+        }
+      });
+
+      // Generate simple HTML inside the iframe
+      const topicsListHTML = book.topics.map(t => `<li>${t}</li>`).join("");
+
+      const content = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              padding: 25px;
+              color: #2c3e50;
+              line-height: 1.6;
+              background-color: #ffffff;
+            }
+            h1 {
+              color: #2c3e50;
+              font-size: 1.5rem;
+              margin-bottom: 5px;
+            }
+            .author {
+              font-size: 1rem;
+              color: #7f8c8d;
+              margin-bottom: 15px;
+            }
+            .badge {
+              display: inline-block;
+              background-color: #e8f4fd;
+              color: #2980b9;
+              padding: 4px 10px;
+              border-radius: 4px;
+              font-size: 0.85rem;
+              font-weight: 600;
+              margin-bottom: 15px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 15px 0 20px 0;
+            }
+            table, th, td {
+              border: 1px solid #cbd5e1;
+            }
+            th, td {
+              padding: 10px 12px;
+              text-align: left;
+              font-size: 0.9rem;
+            }
+            th {
+              background-color: #f1f5f9;
+              width: 25%;
+              color: #334155;
+            }
+            td {
+              color: #475569;
+            }
+            h2 {
+              font-size: 1.15rem;
+              color: #2c3e50;
+              margin: 20px 0 8px 0;
+              border-bottom: 1px solid #e2e8f0;
+              padding-bottom: 5px;
+            }
+            p {
+              font-size: 0.95rem;
+              color: #475569;
+              margin-bottom: 15px;
+            }
+            ul {
+              margin-left: 20px;
+              color: #475569;
+              font-size: 0.95rem;
+            }
+            li {
+              margin-bottom: 6px;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>${book.title}</h1>
+          <div class="author">By <strong>${book.author}</strong></div>
+          <span class="badge">${book.category}</span>
+
+          <h2>Book Specifications</h2>
+          <table>
+            <tr>
+              <th>Publisher</th>
+              <td>${book.publisher}</td>
+            </tr>
+            <tr>
+              <th>Edition & Year</th>
+              <td>${book.edition} (${book.year})</td>
+            </tr>
+            <tr>
+              <th>ISBN</th>
+              <td>${book.isbn}</td>
+            </tr>
+            <tr>
+              <th>Price</th>
+              <td><strong>${book.price}</strong></td>
+            </tr>
+          </table>
+
+          <h2>Description</h2>
+          <p>${book.description}</p>
+
+          <h2>Key Topics Covered</h2>
+          <ul>
+            ${topicsListHTML}
+          </ul>
+        </body>
+        </html>
+      `;
+
+      // Set iframe content
+      iframe.srcdoc = content;
+    }
+
+    // Load first book by default on page load
+    window.onload = function() {
+      displayBook(0);
+    };
+  </script>
+</body>
+</html>
